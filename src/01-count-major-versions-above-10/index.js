@@ -25,12 +25,30 @@ The results should have this structure:
  ******
 
  *  With the results from this request, inside "content", count
- *  the number of packages that have a MAJOR semver version 
+ *  the number of packages that have a MAJOR semver version
  *  greater than 10.x.x
  */
 
-module.exports = async function countMajorVersionsAbove10() {
-  // TODO
+const fetch = require('node-fetch');
 
-  return count
+module.exports = async function countMajorVersionsAbove10() {
+  const response = await fetch(
+    'http://ambush-api.inyourarea.co.uk/ambush/intercept',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        url: 'https://api.npms.io/v2/search/suggestions?q=react',
+        method: 'GET',
+        return_payload: true,
+      }),
+    },
+  );
+  const data = await response.json();
+
+  const versionsAbove10 = data.content.filter(npmPackage => {
+    const semVerArray = npmPackage.package.version.split('.');
+    return semVerArray[0] > 10;
+  });
+
+  return versionsAbove10.length;
 };
